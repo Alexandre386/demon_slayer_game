@@ -42,8 +42,8 @@ class Map:
 
         # Défilement
         self.bg_x = 0
-        self.bg_speed = 5  # vitesse de base du fond
-        self.obstacle_speed = 5  # vitesse de base des obstacles
+        self.bg_speed = 5.0  # vitesse de base du fond
+        self.obstacle_speed = 5.0  # vitesse de base des obstacles
 
         # --- Charger textures d'obstacles ---
         self.obstacle_textures = []
@@ -79,7 +79,7 @@ class Map:
         if random.randrange(0, 100) <= self.buff_spawn_chance:
             # Handle buff obstacle
             texture = self.obstacle_buff_texture
-            h = 70
+            h = 50
             ratio = h / texture.get_height()
             w = int(texture.get_width() * ratio)
             texture_redim = pygame.transform.scale(texture, (w, h))

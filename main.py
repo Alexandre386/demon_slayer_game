@@ -46,18 +46,17 @@ def jeu():
 
         # Collision/Buff
         collision = False
-        for obs in game_map.obstacles:
+        for idx, obs in enumerate(game_map.obstacles):
             if tanjiro.hitbox.colliderect(obs["rect"]):
                 if obs["type"] == "buff":
                     last_buff_time = pygame.time.get_ticks()
+                    del game_map.obstacles[idx]
                     break
                 else:
                     collision = True
                     break
 
         buff = False
-        print(last_buff_time)
-        print(pygame.time.get_ticks() - last_buff_time)
         if last_buff_time and (pygame.time.get_ticks() - last_buff_time) < 5000:
             buff = True
 
