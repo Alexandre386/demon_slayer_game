@@ -1,5 +1,6 @@
 import pygame, os
 
+
 class Tanjiro(pygame.sprite.Sprite):
     def __init__(self, x, y, largeur=64, hauteur=55):
         super().__init__()
@@ -13,22 +14,25 @@ class Tanjiro(pygame.sprite.Sprite):
         self.add_frame("run2", "sprites/tanjiro2.png")
         self.add_frame("jump", "sprites/tanjiro1.png")
 
-        # Redimensionner et retourner
+        # Redimensionner et retourner toutes les frames
         for key in self.frames:
-            self.frames[key] = pygame.transform.scale(self.frames[key], (self.largeur, self.hauteur))
+            self.frames[key] = pygame.transform.scale(
+                self.frames[key], (self.largeur, self.hauteur)
+            )
             self.frames[key] = pygame.transform.flip(self.frames[key], True, False)
 
         # Frame initiale
         self.image = self.frames["run1"]
         self.rect = self.image.get_rect(midbottom=(x, y))
 
-        # Hitbox
-        marge_x, marge_y = 8, 5
+        # Hitbox légèrement plus petite que le sprite
+        marge_x = 18  # pixels à enlever sur les côtés
+        marge_y = 15  # pixels à enlever en haut et bas
         self.hitbox = pygame.Rect(
             self.rect.left + marge_x,
             self.rect.top + marge_y,
-            self.largeur - 2*marge_x,
-            self.hauteur - 2*marge_y
+            self.largeur - 2 * marge_x,
+            self.hauteur - 2 * marge_y,
         )
 
         # Physique du saut
@@ -38,11 +42,12 @@ class Tanjiro(pygame.sprite.Sprite):
         self.au_sol = True
         self.sol_y = y
 
-        # Animation
+        # Animation course
         self.current_run_index = 0
         self.run_speed = 0.1
         self.run_order = ["run1", "run2"]
 
+    # Ajouter une frame
     def add_frame(self, name, path):
         chemin = os.path.join(os.path.dirname(__file__), path)
         if not os.path.exists(chemin):
@@ -55,7 +60,8 @@ class Tanjiro(pygame.sprite.Sprite):
         self.rect.y += self.vitesse_y
 
         # Hitbox suit le sprite
-        marge_x, marge_y = 8, 5
+        marge_x = 8
+        marge_y = 5
         self.hitbox.topleft = (self.rect.left + marge_x, self.rect.top + marge_y)
 
         if self.rect.bottom >= self.sol_y:
