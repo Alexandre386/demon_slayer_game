@@ -15,6 +15,11 @@ clock = pygame.time.Clock()
 
 font = pygame.font.SysFont(None, 30)
 
+# Games settings
+BUFF_BOOST_FACTOR = 5
+
+starting_time = pygame.time.get_ticks()
+
 
 def jeu():
     # Création du décor et du personnage
@@ -24,6 +29,7 @@ def jeu():
 
     score = 0
     dernier_pallier = 0
+    last_buff_time = 0
 
     while True:
         for event in pygame.event.get():
@@ -38,15 +44,28 @@ def jeu():
         perso_group.update()
         game_map.update()
 
-        # Collision
+        # Collision/Buff
         collision = False
         for obs in game_map.obstacles:
             if tanjiro.hitbox.colliderect(obs["rect"]):
-                collision = True
-                break
+                if obs["type"] == "buff":
+                    last_buff_time = pygame.time.get_ticks()
+                    break
+                else:
+                    collision = True
+                    break
+
+        buff = False
+        print(last_buff_time)
+        print(pygame.time.get_ticks() - last_buff_time)
+        if last_buff_time and (pygame.time.get_ticks() - last_buff_time) < 5000:
+            buff = True
 
         # Score
-        score += 1
+        if buff:
+            score += 1 * BUFF_BOOST_FACTOR
+        else:
+            score += 1
 
         # Accélération tous les 1500 points
         pallier = score // 1500
@@ -62,7 +81,10 @@ def jeu():
         perso_group.draw(fenetre)
 
         # Score
-        score_surf = font.render(f"Score : {score}", True, (0, 0, 0))
+        if buff:
+            score_surf = font.render(f"Score : {score}", True, (255, 255, 0))
+        else:
+            score_surf = font.render(f"Score : {score}", True, (0, 0, 0))
         fenetre.blit(score_surf, (10, 10))
 
         pygame.display.flip()

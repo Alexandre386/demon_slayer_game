@@ -20,6 +20,9 @@ class Map:
         self.obstacle_interval = 1200
         self.spawn_delay = 2000
 
+        # Chances a buff obstacle will spawn
+        self.buff_spawn_chance = 20
+
         # --- Fond ---
         if sprite_fond:
             chemin_fond = os.path.join(os.path.dirname(__file__), sprite_fond)
@@ -55,29 +58,67 @@ class Map:
             else:
                 print(f"⚠️ Texture d'obstacle introuvable : {chemin_tex}")
 
+        # --- Load obstacle buff texture ---
+        chemin_tex = os.path.join(
+            os.path.dirname(__file__),
+            "sprites",
+            "Obstacles",
+            "nezuko.png",
+        )
+        if os.path.exists(chemin_tex):
+            img = pygame.image.load(chemin_tex).convert_alpha()
+            self.obstacle_buff_texture = img
+        else:
+            print(f"⚠️ Texture d'obstacle introuvable : {chemin_tex}")
+
     def spawn_obstacle(self):
         """
         Crée un nouvel obstacle à droite de l'écran avec taille aléatoire.
         """
-        if self.obstacle_textures:
-            texture = random.choice(self.obstacle_textures)
 
-            # Hauteur aléatoire
-            h = random.randint(50, 70)
+        if random.randrange(0, 100) <= self.buff_spawn_chance:
+            # Handle buff obstacle
+            texture = self.obstacle_buff_texture
+            h = 70
             ratio = h / texture.get_height()
             w = int(texture.get_width() * ratio)
             texture_redim = pygame.transform.scale(texture, (w, h))
 
             # Rect aligné au sol
             rect = texture_redim.get_rect(bottomleft=(self.largeur, self.sol_y))
-            self.obstacles.append({"image": texture_redim, "rect": rect})
+            self.obstacles.append(
+                {"image": texture_redim, "rect": rect, "type": "buff"}
+            )
+
         else:
-            # fallback rectangle
-            w, h = random.randint(30, 70), random.randint(30, 70)
-            x = self.largeur
-            y = self.sol_y - h
-            color = random.choice([(139, 69, 19), (128, 0, 0), (105, 105, 105)])
-            self.obstacles.append({"rect": pygame.Rect(x, y, w, h), "color": color})
+            # Handle normal obstacle
+            if self.obstacle_textures:
+                texture = random.choice(self.obstacle_textures)
+
+                # Hauteur aléatoire
+                h = random.randint(50, 70)
+                ratio = h / texture.get_height()
+                w = int(texture.get_width() * ratio)
+                texture_redim = pygame.transform.scale(texture, (w, h))
+
+                # Rect aligné au sol
+                rect = texture_redim.get_rect(bottomleft=(self.largeur, self.sol_y))
+                self.obstacles.append(
+                    {"image": texture_redim, "rect": rect, "type": "obstacle"}
+                )
+            else:
+                # fallback rectangle
+                w, h = random.randint(30, 70), random.randint(30, 70)
+                x = self.largeur
+                y = self.sol_y - h
+                color = random.choice([(139, 69, 19), (128, 0, 0), (105, 105, 105)])
+                self.obstacles.append(
+                    {
+                        "rect": pygame.Rect(x, y, w, h),
+                        "color": color,
+                        "type": "obstacle",
+                    }
+                )
 
     def update(self):
         """
