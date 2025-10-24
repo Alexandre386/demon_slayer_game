@@ -37,7 +37,7 @@ def jeu():
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
                     tanjiro.saut()
             elif event.type == pygame.MOUSEBUTTONUP:
                 tanjiro.attack()

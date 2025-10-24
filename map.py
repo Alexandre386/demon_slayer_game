@@ -21,8 +21,8 @@ class Map:
         self.spawn_delay = 2000
 
         # Chances a buff obstacle will spawn
-        self.buff_spawn_chance = 20
-        
+        self.buff_spawn_chance = 5
+
         # Chances a demon obstacle will spawn
         self.demon_spawn_chance = 20
 
@@ -72,7 +72,7 @@ class Map:
             self.obstacle_buff_texture = img
         else:
             print(f"⚠️ Texture d'obstacle introuvable : {chemin_tex}")
-        
+
         # --- Load obstacle demon texture ---
         chemin_tex = os.path.join(
             os.path.dirname(__file__),
@@ -102,13 +102,18 @@ class Map:
             # Rect aligné au sol
             rect = texture_redim.get_rect(bottomleft=(self.largeur, self.sol_y))
             self.obstacles.append(
-                {"image": texture_redim, "rect": rect, "type": "buff"}
+                {
+                    "image": texture_redim,
+                    "rect": rect,
+                    "type": "buff",
+                    "x": float(rect.x),
+                }
             )
 
         elif random.randrange(0, 100) <= self.demon_spawn_chance:
             # Handle demon obstacle
             texture = self.obstacle_demon_texture
-            h = 50
+            h = 60
             ratio = h / texture.get_height()
             w = int(texture.get_width() * ratio)
             texture_redim = pygame.transform.scale(texture, (w, h))
@@ -116,7 +121,12 @@ class Map:
             # Rect aligné au sol
             rect = texture_redim.get_rect(bottomleft=(self.largeur, self.sol_y))
             self.obstacles.append(
-                {"image": texture_redim, "rect": rect, "type": "demon"}
+                {
+                    "image": texture_redim,
+                    "rect": rect,
+                    "type": "demon",
+                    "x": float(rect.x),
+                }
             )
 
         else:
@@ -133,7 +143,12 @@ class Map:
                 # Rect aligné au sol
                 rect = texture_redim.get_rect(bottomleft=(self.largeur, self.sol_y))
                 self.obstacles.append(
-                    {"image": texture_redim, "rect": rect, "type": "obstacle"}
+                    {
+                        "image": texture_redim,
+                        "rect": rect,
+                        "type": "obstacle",
+                        "x": float(rect.x),
+                    }
                 )
             else:
                 # fallback rectangle
@@ -159,7 +174,8 @@ class Map:
             self.last_spawn = now
 
         for obs in self.obstacles:
-            obs["rect"].x -= self.bg_speed
+            obs["x"] -= self.bg_speed
+            obs["rect"].x = int(obs["x"])
 
         # Supprimer obstacles sortis de l'écran
         self.obstacles = [obs for obs in self.obstacles if obs["rect"].right > 0]
@@ -168,13 +184,13 @@ class Map:
         if self.background:
             self.bg_x -= self.bg_speed
             if self.bg_x <= -self.largeur:
-                self.bg_x = 0
+                self.bg_x += self.largeur
 
     def draw(self, surface):
         """
         Dessine le fond et les obstacles sur la surface.
         """
-        # Fond
+        # # Fond
         if self.background:
             surface.blit(self.background, (self.bg_x, 0))
             surface.blit(self.background, (self.bg_x + self.largeur, 0))
