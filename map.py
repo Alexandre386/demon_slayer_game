@@ -22,6 +22,9 @@ class Map:
 
         # Chances a buff obstacle will spawn
         self.buff_spawn_chance = 20
+        
+        # Chances a demon obstacle will spawn
+        self.demon_spawn_chance = 20
 
         # --- Fond ---
         if sprite_fond:
@@ -43,7 +46,6 @@ class Map:
         # Défilement
         self.bg_x = 0
         self.bg_speed = 5.0  # vitesse de base du fond
-        self.obstacle_speed = 5.0  # vitesse de base des obstacles
 
         # --- Charger textures d'obstacles ---
         self.obstacle_textures = []
@@ -70,6 +72,19 @@ class Map:
             self.obstacle_buff_texture = img
         else:
             print(f"⚠️ Texture d'obstacle introuvable : {chemin_tex}")
+        
+        # --- Load obstacle demon texture ---
+        chemin_tex = os.path.join(
+            os.path.dirname(__file__),
+            "sprites",
+            "Obstacles",
+            "demon2.png",
+        )
+        if os.path.exists(chemin_tex):
+            img = pygame.image.load(chemin_tex).convert_alpha()
+            self.obstacle_demon_texture = img
+        else:
+            print(f"⚠️ Texture d'obstacle demon introuvable : {chemin_tex}")
 
     def spawn_obstacle(self):
         """
@@ -88,6 +103,20 @@ class Map:
             rect = texture_redim.get_rect(bottomleft=(self.largeur, self.sol_y))
             self.obstacles.append(
                 {"image": texture_redim, "rect": rect, "type": "buff"}
+            )
+
+        elif random.randrange(0, 100) <= self.demon_spawn_chance:
+            # Handle demon obstacle
+            texture = self.obstacle_demon_texture
+            h = 50
+            ratio = h / texture.get_height()
+            w = int(texture.get_width() * ratio)
+            texture_redim = pygame.transform.scale(texture, (w, h))
+
+            # Rect aligné au sol
+            rect = texture_redim.get_rect(bottomleft=(self.largeur, self.sol_y))
+            self.obstacles.append(
+                {"image": texture_redim, "rect": rect, "type": "demon"}
             )
 
         else:
@@ -130,7 +159,7 @@ class Map:
             self.last_spawn = now
 
         for obs in self.obstacles:
-            obs["rect"].x -= self.obstacle_speed
+            obs["rect"].x -= self.bg_speed
 
         # Supprimer obstacles sortis de l'écran
         self.obstacles = [obs for obs in self.obstacles if obs["rect"].right > 0]

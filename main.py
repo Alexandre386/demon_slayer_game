@@ -39,12 +39,18 @@ def jeu():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     tanjiro.saut()
+            elif event.type == pygame.MOUSEBUTTONUP:
+                tanjiro.attack()
 
         # Update
         perso_group.update()
         game_map.update()
 
-        # Collision/Buff
+        buff = False
+        if last_buff_time and (pygame.time.get_ticks() - last_buff_time) < 5000:
+            buff = True
+
+        # Obstacle/Buff collision
         collision = False
         for idx, obs in enumerate(game_map.obstacles):
             if tanjiro.hitbox.colliderect(obs["rect"]):
@@ -52,13 +58,12 @@ def jeu():
                     last_buff_time = pygame.time.get_ticks()
                     del game_map.obstacles[idx]
                     break
+                elif obs["type"] == "demon" and tanjiro.is_attacking:
+                    del game_map.obstacles[idx]
+                    break
                 else:
                     collision = True
                     break
-
-        buff = False
-        if last_buff_time and (pygame.time.get_ticks() - last_buff_time) < 5000:
-            buff = True
 
         # Score
         if buff:
@@ -71,7 +76,6 @@ def jeu():
         if pallier > dernier_pallier:
             tanjiro.run_speed += 0.1
             game_map.bg_speed += 0.5
-            game_map.obstacle_speed += 0.5
             dernier_pallier = pallier
 
         # Affichage
